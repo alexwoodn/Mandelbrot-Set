@@ -2,7 +2,6 @@
 #include "ComplexPlane.cpp"
 
 using namespace sf;
-using namespace std;
 
 int main() {
     // Get desktop resolution
