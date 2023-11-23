@@ -1,22 +1,19 @@
 #include <SFML/Graphics.hpp>
-#include "ComplexPlane.cpp"
+#include "ComplexPlane.h"
 
 using namespace sf;
 
 int main() {
-    // Get desktop resolution
-    unsigned int screenWidth = VideoMode::getDesktopMode().width / 2;
-    unsigned int screenHeight = VideoMode::getDesktopMode().height / 2;
-
-    // Construct the RenderWindow
-    RenderWindow window(VideoMode(screenWidth, screenHeight), "Complex Plane Visualization");
+    // Get desktop resolution and construct the RenderWindow
+    VideoMode desktop = VideoMode::getDesktopMode();
+    RenderWindow window(desktop, "Mandelbrot Set Viewer", Style::Default);
 
     // Construct the ComplexPlane
-    ComplexPlane complexPlane(screenWidth, screenHeight);
+    ComplexPlane complexPlane(desktop.width / 2, desktop.height / 2); // Using half resolution for performance
 
     // Construct the Font and Text objects
     Font font;
-    if (!font.loadFromFile("arial.ttf")) {
+    if (!font.loadFromFile("fonts/KOMIKAP_.ttf")) {
         // Handle font loading error
         return EXIT_FAILURE;
     }
@@ -26,42 +23,36 @@ int main() {
     text.setCharacterSize(20);
     text.setFillColor(Color::White);
 
-    // Main loop
+    // Begin the main loop
     while (window.isOpen()) {
         // Handle Input segment
         Event event;
         while (window.pollEvent(event)) {
-            switch (event.type) {
-                case Event::Closed:
-                    window.close();
-                    break;
+            // Handle Event::Closed
+            if (event.type == Event::Closed)
+                window.close();
 
-                case Event::MouseButtonPressed:
-                    if (event.mouseButton.button == Mouse::Right) {
-                        // Right click to zoom out
-                        complexPlane.zoomOut(event.mouseButton.x, event.mouseButton.y);
-                        complexPlane.setCalculationState(ComplexPlane::CalculationState::CALCULATING);
-                    } else if (event.mouseButton.button == Mouse::Left) {
-                        // Left click to zoom in
-                        complexPlane.zoomIn(event.mouseButton.x, event.mouseButton.y);
-                        complexPlane.setCalculationState(ComplexPlane::CalculationState::CALCULATING);
-                    }
-                    break;
+            // Handle Event::MouseButtonPressed
+            if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Right) {
+                    // Right-click to zoom out
+                    complexPlane.zoomOut();
+                } else if (event.mouseButton.button == Mouse::Left) {
+                    // Left-click to zoom in
+                    complexPlane.zoomIn();
+                }
+            }
 
-                case Event::MouseMoved:
-                    // Store mouse location for later use
-                    complexPlane.setMouseLocation(event.mouseMove.x, event.mouseMove.y);
-                    break;
-
-                default:
-                    break;
+            // Handle Event::MouseMoved
+            if (event.type == Event::MouseMoved) {
+                // Set the cursor position
+                complexPlane.setMouseLocation(Mouse::getPosition(window));
             }
         }
 
-        // Check if Escape key is pressed to close the window
-        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+        // Check for Escape key
+        if (Keyboard::isKeyPressed(Keyboard::Escape))
             window.close();
-        }
 
         // Update Scene segment
         complexPlane.updateRender();
@@ -76,5 +67,5 @@ int main() {
         window.display();
     }
 
-    return EXIT_SUCCESS;
+    return 0;
 }
